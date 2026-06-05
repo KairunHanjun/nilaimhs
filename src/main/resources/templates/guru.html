@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru Dashboard - Pengolahan Nilai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body class="bg-gray-100 font-sans flex min-h-screen">
+
+    <aside class="w-64 bg-slate-800 text-white flex flex-col justify-between">
+        <div>
+            <div class="p-5 text-xl font-bold tracking-wider border-b border-slate-700 text-center">
+                PANEL GURU
+            </div>
+            <nav class="mt-6 px-4 space-y-2">
+                <button type="button" onclick="showSection('dashboard')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded hover:bg-slate-700 text-white font-medium transition text-left">
+                    <span>Profil & Data Diri</span>
+                </button>
+                <button type="button" onclick="showSection('kelolaSiswa')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded text-slate-300 hover:bg-slate-700 hover:text-white transition text-left">
+                    <span>Kelola Nilai Siswa</span>
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-4 border-t border-slate-700">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-center font-medium transition">
+                    Keluar / Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-8 bg-gray-50 relative">
+        
+        <section id="sectionDashboard" class="block">
+            <header class="mb-8 border-b pb-4">
+                <h1 class="text-3xl font-semibold text-gray-800">Profil Data Diri</h1>
+                <p class="text-gray-500 text-sm">Perbarui informasi data diri Anda di sini.</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-lg shadow border border-gray-200 max-w-3xl mx-auto">
+                <form id="profilGuruForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP / Nomor Induk (Tidak bisa diubah)</label>
+                        <input type="text" id="guruNip" th:value="${guru.nip}" class="w-full bg-gray-100 text-gray-500 rounded-md p-2 border border-gray-300 cursor-not-allowed" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="guruNama" th:value="${guru.nama}" class="w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                        <input type="text" id="guruMapel" th:value="${guru.mata_pelajaran}" class="w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password Baru (Kosongkan jika tidak ingin diubah)</label>
+                        <input type="password" id="guruPassword" class="w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500" placeholder="********">
+                    </div>
+                    
+                    <div class="pt-4 border-t">
+                        <button type="button" onclick="updateProfilGuru()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition">
+                            Simpan Perubahan Data Diri
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="sectionKelolaSiswa" class="hidden">
+            <header class="mb-8 border-b pb-4">
+                <h1 class="text-3xl font-semibold text-gray-800">Kelola Nilai Siswa</h1>
+                <p class="text-gray-500 text-sm">Cari berdasarkan NIS dan perbarui nilai siswa.</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-lg shadow border border-gray-200 max-w-4xl mx-auto">
+                
+                <div class="flex gap-4 items-end mb-6 pb-6 border-b">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Siswa (NIS)</label>
+                        <input type="text" id="nis" class="w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500" placeholder="Masukkan NIS..." required>
+                    </div>
+                    <button type="button" onclick="cariDataSiswa()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md transition h-[42px]">
+                        Cari Siswa
+                    </button>
+                </div>
+
+                <form id="formEditSiswa" class="hidden space-y-6">
+                    <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-md border border-gray-200">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Nama Siswa</label>
+                            <div id="siswaNamaReadonly" class="font-semibold text-gray-800 text-lg"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase">Kelas</label>
+                            <div id="siswaKelasReadonly" class="font-semibold text-gray-800 text-lg"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 bg-green-50 p-4 rounded-md border border-green-100">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Tugas</label>
+                            <input type="number" id="siswaNilaiTugas" class="w-full border-gray-300 rounded-md p-2 border bg-white" min="0" max="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nilai UTS</label>
+                            <input type="number" id="siswaNilaiUTS" class="w-full border-gray-300 rounded-md p-2 border bg-white" min="0" max="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nilai UAS</label>
+                            <input type="number" id="siswaNilaiUAS" class="w-full border-gray-300 rounded-md p-2 border bg-white" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-md border border-gray-200">
+                        <div>
+                            <span class="text-sm text-gray-500 block">Nilai Akhir Terkalkulasi:</span>
+                            <span id="siswaNilaiAkhir" class="text-2xl font-bold text-gray-800">0.0</span>
+                        </div>
+                        <div>
+                            <div id="siswaLulus" class="hidden bg-green-100 text-green-700 border border-green-300 rounded px-4 py-1 font-bold uppercase text-sm">LULUS</div>
+                            <div id="siswaTidakLulus" class="hidden bg-red-100 text-red-700 border border-red-300 rounded px-4 py-1 font-bold uppercase text-sm">TIDAK LULUS</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t">
+                        <button type="button" onclick="simpanDataSiswa()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 rounded-md transition">
+                            Simpan Perubahan Nilai Siswa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function getHeaders() {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            return {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken 
+            };
+        }
+
+        function showSection(sectionName) {
+            document.getElementById('sectionDashboard').classList.add('hidden');
+            document.getElementById('sectionKelolaSiswa').classList.add('hidden');
+            
+            if (sectionName === 'dashboard') {
+                document.getElementById('sectionDashboard').classList.remove('hidden');
+            } else if (sectionName === 'kelolaSiswa') {
+                document.getElementById('sectionKelolaSiswa').classList.remove('hidden');
+            }
+        }
+
+        // --- 1. Fungsi Update Data Diri Guru ---
+        async function updateProfilGuru() {
+            const nip = document.getElementById('guruNip').value;
+            const payload = {
+                nama: document.getElementById('guruNama').value,
+                mataPelajaran: document.getElementById('guruMapel').value,
+                password: document.getElementById('guruPassword').value
+            };
+
+            if(!confirm("Simpan perubahan data diri?")) return;
+
+            try {
+                // Endpoint ini bisa menggunakan endpoint PUT /api/admin/users/{nomorInduk} yang sudah kita buat sebelumnya
+                const response = await fetch(`/api/protected/profil`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                alert(result.message || "Data diri berhasil diperbarui!");
+                document.getElementById('guruPassword').value = ''; // Kosongkan field password
+            } catch (error) {
+                alert("Gagal memperbarui data diri.");
+            }
+        }
+
+        // --- 2. Fungsi Cari Data Siswa (Sesuai Logika yang Diberikan) ---
+        async function cariDataSiswa() {
+            document.getElementById('siswaLulus').classList.add('hidden');
+            document.getElementById('siswaTidakLulus').classList.add('hidden');
+            document.getElementById('formEditSiswa').classList.add('hidden'); // Sembunyikan form dulu
+
+            const nis = document.getElementById('nis').value;
+            if (!nis) return alert("Silakan isi NIS terlebih dahulu!");
+
+            try {
+                const response = await fetch(`/api/protected/siswa/${nis}`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Tampilkan Data Teks
+                    document.getElementById('siswaNamaReadonly').innerText = data.nama || '-';
+                    document.getElementById('siswaKelasReadonly').innerText = data.kelas || '-';
+                    
+                    // Masukkan ke dalam input value agar bisa diedit
+                    document.getElementById('siswaNilaiTugas').value = data.nilaiTugas || '';
+                    document.getElementById('siswaNilaiUTS').value = data.nilaiUTS || '';
+                    document.getElementById('siswaNilaiUAS').value = data.nilaiUAS || '';
+                    
+                    // Indikator Kalkulasi
+                    document.getElementById('siswaNilaiAkhir').innerText = data.nilaiAkhir || '0.0';
+                    
+                    if((data.statusKelulusan || '') !== ''){
+                        switch(data.statusKelulusan){
+                            case "Lulus":
+                                document.getElementById('siswaLulus').classList.remove('hidden');
+                                break;
+                            case "Tidak Lulus":
+                                document.getElementById('siswaTidakLulus').classList.remove('hidden');
+                                break;
+                        }
+                    }
+                    
+                    // Tampilkan form editnya
+                    document.getElementById('formEditSiswa').classList.remove('hidden');
+                    alert("Data ditemukan!");
+                } else {
+                    alert("Data tidak ditemukan atau belum terdaftar.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Terjadi kesalahan pada server.");
+            }
+        }
+
+        // --- 3. Fungsi Simpan Nilai Siswa ---
+        async function simpanDataSiswa() {
+            const nis = document.getElementById('nis').value;
+            if(!confirm(`Simpan perubahan nilai untuk NIS ${nis}?`)) return;
+
+            // Kita buat payload khusus untuk update nilai
+            const payload = {
+                // role, nama, kelas sengaja dikosongkan karena guru hanya boleh update nilai
+                nilaiTugas: document.getElementById('siswaNilaiTugas').value,
+                nilaiUts: document.getElementById('siswaNilaiUTS').value,
+                nilaiUas: document.getElementById('siswaNilaiUAS').value
+            };
+
+            try {
+                const response = await fetch(`/api/guru/siswa/${nis}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                alert(result.message || "Nilai Siswa berhasil diperbarui!");
+                
+                // Cari ulang data siswa untuk me-refresh Nilai Akhir & Status Lulus
+                cariDataSiswa(); 
+            } catch (error) {
+                alert("Gagal menyimpan nilai.");
+            }
+        }
+    </script>
+</body>
+</html>
