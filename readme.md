@@ -1,4 +1,4 @@
-# 🎓 Sistem Pengolahan Nilai Akademik (Academic Grading System)
+# Sistem Pengolahan Nilai Akademik (Academic Grading System)
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg?logo=springboot)
 ![Java](https://img.shields.io/badge/Java-17%2B-blue.svg?logo=java)
@@ -7,26 +7,26 @@
 
 Aplikasi berbasis web untuk manajemen pengguna dan pengolahan nilai siswa yang dibangun menggunakan arsitektur **Model-View-Controller (MVC)** dengan **Spring Boot**. Proyek ini dirancang untuk memenuhi standar Uji Kompetensi Keahlian (LSP) dengan mengedepankan keamanan berlapis dan *User Experience* (UX) bergaya *Single Page Application* (SPA).
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 Sistem ini memiliki pembagian hak akses (*Role-Based Access Control*) yang ketat untuk 3 jenis pengguna:
 
-### 👨‍💻 1. Admin (Administrator)
+### 1. Admin (Administrator)
 * **Dashboard Statistik:** Pemantauan jumlah total Guru, Siswa, dan Nilai Terproses secara *real-time*.
 * **Manajemen Pengguna (CRUD):** Mendaftarkan, mencari, mengedit, dan menghapus data pengguna (Admin/Guru/Siswa) dalam satu antarmuka SPA tanpa *reload* halaman (menggunakan Fetch API).
 
-### 👨‍🏫 2. Guru
+### 2. Guru
 * **Kelola Nilai Siswa:** Pencarian data siswa berdasarkan NIS untuk melakukan *input* atau *update* Nilai Tugas, UTS, dan UAS.
 * **Auto-Kalkulasi:** Sistem secara otomatis menghitung Nilai Akhir (30% Tugas + 30% UTS + 40% UAS) dan menentukan Status Kelulusan (Batas Minimal: 70).
 * **Manajemen Profil:** Memperbarui data diri dan mengubah *password* secara mandiri.
 
-### 👨‍🎓 3. Siswa
+### 3. Siswa
 * **Laporan Akademik:** Melihat rincian nilai dan status kelulusan pribadi (Nilai ditarik otomatis dari Sesi Login / *Authentication Context*).
 * **Manajemen Profil:** Memperbarui nama, kelas, dan *password* akun pribadi.
 
 ---
 
-## 🛡️ Sorotan Keamanan (Security Highlights)
+## Sorotan Keamanan (Security Highlights)
 
 Proyek ini tidak hanya fungsional, tetapi juga mengimplementasikan standar keamanan web industri (*Best Practices*):
 
@@ -37,7 +37,7 @@ Proyek ini tidak hanya fungsional, tetapi juga mengimplementasikan standar keama
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
 **Backend:**
 * Java 17 / 21
@@ -53,7 +53,7 @@ Proyek ini tidak hanya fungsional, tetapi juga mengimplementasikan standar keama
 
 ---
 
-## 🚀 Cara Menjalankan Proyek (Getting Started)
+## Cara Menjalankan Proyek (Getting Started)
 
 ### Prasyarat
 * Java Development Kit (JDK) 17 atau lebih baru
@@ -88,7 +88,7 @@ Proyek ini tidak hanya fungsional, tetapi juga mengimplementasikan standar keama
 
 ---
 
-## 🧪 Pengujian (Testing)
+## Pengujian (Testing)
 Proyek ini dilengkapi dengan *Unit Testing* dan *Integration Testing* menggunakan JUnit 5. Pengujian mencakup:
 * Simulasi Login & Keamanan Peran (Role Security).
 * Logika Kalkulasi Nilai Akhir.
