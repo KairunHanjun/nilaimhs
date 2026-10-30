@@ -12,6 +12,16 @@ public class SiswaService {
     @Autowired
     private SiswaRepository siswaRepository;
 
+    public java.util.Map<String, Object> laporan(Siswa siswa) {
+        boolean complete = siswa.getNilaiTugas() != null && siswa.getNilaiUts() != null && siswa.getNilaiUas() != null;
+        Double finalGrade = complete ? Math.round(hitungNilaiAkhir(siswa.getNilaiTugas(), siswa.getNilaiUts(), siswa.getNilaiUas()) * 100.0) / 100.0 : null;
+        java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("nis", siswa.getNis()); result.put("nama", siswa.getNama()); result.put("kelas", siswa.getKelas());
+        result.put("nilaiTugas", siswa.getNilaiTugas()); result.put("nilaiUTS", siswa.getNilaiUts()); result.put("nilaiUAS", siswa.getNilaiUas());
+        result.put("nilaiAkhir", finalGrade); result.put("statusKelulusan", complete ? tentukanStatusKelulusan(finalGrade) : "");
+        return result;
+    }
+
     public Siswa saveStudentGrade(Siswa student) {
         // Validasi dilakukan sebelum menyimpan ke database
         if (student.getNilaiTugas() != null) validasiNilai(student.getNilaiTugas());

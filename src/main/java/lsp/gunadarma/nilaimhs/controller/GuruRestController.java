@@ -23,8 +23,10 @@ public class GuruRestController {
     private SiswaRepository siswaRepository;
 
     // Gunakan class DTO yang sama atau import dari AdminRestController.UserFormDTO
+    @org.springframework.transaction.annotation.Transactional
     @PutMapping("/siswa/{nis}")
     public ResponseEntity<?> editDataSiswa(@PathVariable("nis") String nis, @RequestBody ProtectedRestController.UserFormDTO formData) {
+        lsp.gunadarma.nilaimhs.service.FormValidation.grades(formData);
         Optional<Users> userOpt = userRepository.findBynomorInduk(nis);
         
         if (userOpt.isEmpty()) {
@@ -49,27 +51,7 @@ public class GuruRestController {
             return ResponseEntity.ok(Map.of("message", "Nilai Siswa " + nis + " berhasil diperbarui!"));
         }
 
-        return ResponseEntity.status(500).body(Map.of("message", "Gagal memperbarui data."));
+        return ResponseEntity.status(404).body(Map.of("message", "Gagal memperbarui data."));
     }
 
-    // @DeleteMapping("/siswa/{nis}")
-    // public ResponseEntity<?> hapusDataSiswa(@PathVariable("nis") String nis) {
-    //     Optional<Users> userOpt = userRepository.findBynomorInduk(nis);
-        
-    //     if (userOpt.isEmpty()) {
-    //         return ResponseEntity.status(404).body(Map.of("message", "Data tidak ditemukan!"));
-    //     }
-
-    //     // VALIDASI KETAT: Pastikan yang dihapus HANYA role SISWA
-    //     if (!userOpt.get().getRole().equalsIgnoreCase("SISWA")) {
-    //         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-    //                 .body(Map.of("message", "Akses ditolak! Anda hanya dapat menghapus data Siswa."));
-    //     }
-
-    //     // Proses hapus dari tabel Siswa, lalu tabel Users
-    //     siswaRepository.deleteById(nis);
-    //     userRepository.delete(userOpt.get());
-
-    //     return ResponseEntity.ok(Map.of("message", "Data Siswa " + nis + " berhasil dihapus!"));
-    // }
 }

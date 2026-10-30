@@ -9,6 +9,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, String>{
+public interface UserRepository extends JpaRepository<Users, Long>{
     Optional<Users> findBynomorInduk(String nomor_induk);
 }

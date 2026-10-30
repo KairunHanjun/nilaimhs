@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <aside th:fragment="sidebar(role)" class="sidebar">
+      <a class="brand" href="/"
+        >N<span>Nilai Akademik<small>Ruang kerja akademik</small></span></a
+      >
+      <p class="nav-label" th:text="'PANEL ' + ${role}">PANEL</p>
+      <nav aria-label="Navigasi utama">
+        <button class="nav-item active" data-section="overview">
+          Ringkasan</button
+        ><button
+          th:if="${role == 'ADMIN'}"
+          class="nav-item"
+          data-section="users"
+        >
+          Kelola pengguna</button
+        ><button
+          th:if="${role != 'SISWA'}"
+          class="nav-item"
+          data-section="grades"
+        >
+          Laporan nilai</button
+        ><button
+          th:if="${role == 'GURU'}"
+          class="nav-item"
+          data-section="editor"
+        >
+          Input nilai</button
+        ><button
+          th:if="${role == 'SISWA'}"
+          class="nav-item"
+          data-section="report"
+        >
+          Laporan saya</button
+        ><button
+          th:if="${role != 'ADMIN'}"
+          class="nav-item"
+          data-section="profile"
+        >
+          Profil saya
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <p th:if="${@environment.acceptsProfiles('demo')}" class="demo-pill">
+          ● Mode demo · Data fiktif
+        </p>
+        <form th:action="@{/logout}" method="post">
+          <button class="logout" type="submit">Keluar dari akun ↗</button>
+        </form>
+      </div>
+    </aside>
+    <header th:fragment="header(role)" class="topbar">
+      <span>Sistem Pengolahan Nilai Akademik</span>
+      <div>
+        <span class="role-badge" th:text="${role}"></span
+        ><span class="avatar" th:text="${#strings.substring(role,0,1)}"></span>
+      </div>
+    </header>
+  </body>
+</html>

@@ -13,6 +13,11 @@ import lsp.gunadarma.nilaimhs.repository.SiswaRepository;
 
 @Controller
 public class MainController {
+    @org.springframework.web.bind.annotation.ModelAttribute("currentUsername")
+    public String currentUsername(Authentication authentication) {
+        return authentication == null ? "" : authentication.getName();
+    }
+
 
     @GetMapping("/login")
     public String loginPage(Authentication authentication) {

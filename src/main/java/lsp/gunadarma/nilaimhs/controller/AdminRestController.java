@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import lsp.gunadarma.nilaimhs.service.FormValidation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +41,21 @@ public class AdminRestController {
 
     // Struktur DTO (Data Transfer Object)
     
+
+    @GetMapping("/users")
+    public ResponseEntity<?> daftarUsers() {
+        return ResponseEntity.ok(userRepository.findAll().stream().map(user -> {
+            Map<String, Object> row = new HashMap<>();
+            row.put("nomorInduk", user.getNomorInduk()); row.put("role", user.getRole());
+            if ("GURU".equals(user.getRole())) guruRepository.findById(user.getNomorInduk()).ifPresent(guru -> {
+                row.put("nama", guru.getNama()); row.put("detail", guru.getMata_pelajaran());
+            });
+            if ("SISWA".equals(user.getRole())) siswaRepository.findById(user.getNomorInduk()).ifPresent(siswa -> {
+                row.put("nama", siswa.getNama()); row.put("detail", siswa.getKelas());
+            });
+            return row;
+        }).sorted(java.util.Comparator.comparing(row -> row.get("nomorInduk").toString())).toList());
+    }
 
     // 1. CARI DATA (GET)
     @GetMapping("/users/{nomorInduk}")
@@ -77,8 +95,10 @@ public class AdminRestController {
     }
 
     // 2. DAFTAR USER BARU (POST)
+    @Transactional
     @PostMapping("/users")
     public ResponseEntity<?> mendaftarkanUser(@RequestBody ProtectedRestController.UserFormDTO formData) {
+        FormValidation.user(formData, formData.role, true);
         // Cek apakah nomor induk sudah ada
         if (userRepository.findBynomorInduk(formData.nomorInduk).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Nomor Induk sudah terdaftar!"));
@@ -113,6 +133,7 @@ public class AdminRestController {
     }
 
     // 3. EDIT DATA (PUT)
+    @Transactional
     @PutMapping("/users/{nomorInduk}")
     public ResponseEntity<?> editData(@PathVariable("nomorInduk") String nomorInduk, @RequestBody ProtectedRestController.UserFormDTO formData) {
         Optional<Users> userOpt = userRepository.findBynomorInduk(nomorInduk);
@@ -122,6 +143,8 @@ public class AdminRestController {
         }
 
         Users user = userOpt.get();
+        FormValidation.user(formData, user.getRole(), false);
+        FormValidation.require(formData.role == null || formData.role.equals(user.getRole()), "Role akun tidak dapat diubah.");
 
         // Update password hanya jika form password diisi
         if (formData.password != null && !formData.password.trim().isEmpty()) {
@@ -155,8 +178,9 @@ public class AdminRestController {
     }
 
     // 4. HAPUS DATA (DELETE)
+    @Transactional
     @DeleteMapping("/users/{nomorInduk}")
-    public ResponseEntity<?> hapusData(@PathVariable("nomorInduk") String nomorInduk) {
+    public ResponseEntity<?> hapusData(@PathVariable("nomorInduk") String nomorInduk, Authentication authentication) {
         Optional<Users> userOpt = userRepository.findBynomorInduk(nomorInduk);
         
         if (userOpt.isEmpty()) {
@@ -165,6 +189,7 @@ public class AdminRestController {
 
         Users user = userOpt.get();
 
+        FormValidation.require(!nomorInduk.equals(authentication.getName()), "Anda tidak dapat menghapus akun sendiri.");
         // Hapus data spesifik terlebih dahulu
         if (user.getRole().equals("GURU")) {
             guruRepository.deleteById(nomorInduk);

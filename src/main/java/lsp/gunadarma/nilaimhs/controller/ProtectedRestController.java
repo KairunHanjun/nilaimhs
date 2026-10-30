@@ -37,6 +37,9 @@ public class ProtectedRestController {
     private SiswaRepository siswaRepository;
 
     @Autowired
+    private lsp.gunadarma.nilaimhs.service.SiswaService siswaService;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -45,6 +48,12 @@ public class ProtectedRestController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @GetMapping("/siswa")
+    public ResponseEntity<?> daftarSiswa() {
+        return ResponseEntity.ok(siswaRepository.findAll(org.springframework.data.domain.Sort.by("nis"))
+            .stream().map(siswaService::laporan).toList());
+    }
+
     @GetMapping("/siswa/{nis}")
     public ResponseEntity<?> cariSiswa(@PathVariable("nis") String nis) {
         Optional<Siswa> siswaOpt = siswaRepository.findById(nis); // Sesuaikan dengan nama method di repositorimu
@@ -52,36 +61,18 @@ public class ProtectedRestController {
             return ResponseEntity.status(404).body(Map.of("message", "Data tidak ditemukan!"));
         }
         
-        Siswa newSiswa = siswaOpt.get();
-        double nilaiAkhir = 0.0;
-        String statusKelulusan = "";
-
-        if (newSiswa.getNilaiTugas() != null && newSiswa.getNilaiUts() != null && newSiswa.getNilaiUas() != null) {
-            nilaiAkhir = (0.30 * newSiswa.getNilaiTugas()) + (0.30 * newSiswa.getNilaiUts()) + (0.40 * newSiswa.getNilaiUas());
-            if (nilaiAkhir >= 70) {
-                statusKelulusan = "Lulus";
-            } else {
-                statusKelulusan = "Tidak Lulus";
-            }
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("nis", newSiswa.getNis());
-        response.put("nama", newSiswa.getNama());
-        response.put("kelas", newSiswa.getKelas());
-        response.put("nilaiTugas", newSiswa.getNilaiTugas());
-        response.put("nilaiUTS", newSiswa.getNilaiUts());
-        response.put("nilaiUAS", newSiswa.getNilaiUas());
-        response.put("nilaiAkhir", nilaiAkhir);
-        response.put("statusKelulusan", statusKelulusan);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(siswaService.laporan(siswaOpt.get()));
     }
 
     // 2. EDIT PROFIL SENDIRI (Otomatis mendeteksi Guru atau Siswa dari sesi Login)
+    @org.springframework.transaction.annotation.Transactional
     @PutMapping("/profil")
     public ResponseEntity<?> editProfilSendiri(@RequestBody UserFormDTO formData, Authentication authentication) {
         
+        lsp.gunadarma.nilaimhs.service.FormValidation.password(formData.password, false);
+        lsp.gunadarma.nilaimhs.service.FormValidation.text(formData.nama, "Nama", false);
+        lsp.gunadarma.nilaimhs.service.FormValidation.text(formData.kelas, "Kelas", false);
+        lsp.gunadarma.nilaimhs.service.FormValidation.text(formData.mataPelajaran, "Mata pelajaran", false);
         // MENGAMBIL IDENTITAS SAH DARI SESI LOGIN (Bukan dari URL)
         String nomorIndukLogin = authentication.getName(); 
         

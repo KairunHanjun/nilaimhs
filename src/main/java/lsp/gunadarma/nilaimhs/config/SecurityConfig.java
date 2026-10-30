@@ -22,8 +22,8 @@ public class SecurityConfig {
                 .requestMatchers("/guru/**", "/api/guru/**").hasRole("GURU")
                 .requestMatchers("/siswa/**", "/api/siswa/**").hasRole("SISWA")
                 // Akses gabungan (Misal: pencarian siswa bisa dilakukan oleh Admin, Guru, dan Siswa itu sendiri)
+                .requestMatchers("/api/protected/profil").hasAnyRole("GURU", "SISWA")
                 .requestMatchers("/api/protected/**").hasAnyRole("ADMIN", "GURU")
-                .requestMatchers("/api/protected/profil").hasAllRoles("GURU", "SISWA")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
